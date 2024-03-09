@@ -1,6 +1,7 @@
 **An offline password manager console application.**
 
 A diagram of the application is found here: https://github.com/leaand01/simplePasswordManager/blob/master/appDiagram.drawio
+![ing5erdiagram](https://github.com/leaand01/simplePasswordManager/blob/master/readmeAppDiagram.drawio.png)
 
 **Security model:**
 My security model is designed to ensure the confidentiality, integrity, and availability (CIA triad) of the application and user data.
