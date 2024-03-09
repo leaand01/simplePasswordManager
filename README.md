@@ -24,7 +24,9 @@ I have embedded multiple lower and higher level security layers to ensure CIA.
 
 **CIA triad**
 confidentiality: prevention of loss of access to resources and data
+
 Integrity: prevention of unauthorized modification of data
+
 Availability: prevention of unauthorized disclosure of data
 
 
