@@ -7,7 +7,6 @@ I have embedded multiple lower and higher level security layers to ensure CIA.
 
 **Confidentiality (ensure data is kept secret or private)**
 - terminal/console is continously cleared, ensuring sensitive information cannot be access by scrolling up the terminal
-- (session related data is deleted upon exiting program - **not implemented. Do if have time**)
 - when logging in your password is not revealed
 - user data is stored in hidden folders 
 - user data is stored in parent directory instead of root directory
