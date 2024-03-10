@@ -27,5 +27,3 @@ I have embedded multiple lower and higher level security layers to ensure CIA.
 - confidentiality: prevention of loss of access to resources and data
 - Integrity: prevention of unauthorized modification of data
 - Availability: prevention of unauthorized disclosure of data
-
-![ing5erdiagram](https://github.com/leaand01/simplePasswordManager/blob/master/readmeAppDiagram.drawio.png)
