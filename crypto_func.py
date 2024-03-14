@@ -4,7 +4,7 @@ import secrets
 from Crypto.Cipher import AES
 
 
-def crng(nbytes):
+def crng(nbytes: int) -> bytes:
     """Cryptographic random number generator
 
     Returns a random byte string containing nbytes number of bytes.

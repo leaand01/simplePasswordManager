@@ -1,4 +1,4 @@
-from cryptography import sha512_hash
+from crypto_func import sha512_hash
 
 secs_until_timeout = 60
 secs_until_redirect = 1
@@ -10,7 +10,7 @@ folder_tagNonce = sha512_hash('_tagNonce')[:folder_length]
 ext = '.env'
 
 # PBKDF2
-iterations = 10000
+iterations = 100000  # OWASP recommends 600.000 iterations for the algorithm used. This is a demo so we use a lower number for increased speed
 dklen = 32  # desired key length in bytes
 
 # malicious
