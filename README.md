@@ -62,6 +62,7 @@ The application has implemented several layers of protection to mitigate the ris
 - You can only create a user with a strong username and password since these are harder to crack. The applications definition of a strong username/password must fulfill the following:
   - Must minimum be of length 9 and contain at least one small and big letter, one digit and one punctuation
   - Username and password cannot be identical
+- Two users cannot have the same login credentials. Since login credentials are not stored a user can only be created if the inputted username and password cannot decrypt a vault of an existing user.
 -	User inputs are sanitized, not allowing certain punctuations, in order to mitigate the risk of XSS
     - Remark: this is redundant as it is an offline application. Thus, if you have access to the application, you have access to the hardware and source code. This feature would only be applicable if it were an online application. I realized this after having implemented the feature so I choose to keep it, should it ever be upgraded to an online version. However, it can easily be removed by editing the banned variable in the config file, setting it equal to banned = [‘:’].
 -	At login your entered password is not shown, mitigating the risk of anyone seeing your password by looking over your shoulder*
