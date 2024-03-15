@@ -1,4 +1,4 @@
-**An offline password manager console application.**
+<!---**An offline password manager console application.**
 
 **Security model:**
 My security model is designed to ensure the confidentiality, integrity, and availability (CIA triad) of the application and user data.
@@ -28,3 +28,4 @@ I have embedded multiple lower and higher level security layers to ensure CIA.
 - Availability: prevention of unauthorized disclosure of data
 
 ![ing5erdiagram](https://github.com/leaand01/simplePasswordManager/blob/master/readmeAppDiagram.drawio.png)
+-->
