@@ -52,37 +52,127 @@ while True:
             sleep(config.secs_until_redirect)
             continue
 
-        # create user
-        clear()
-        print('\nYour user is being created. Please wait...')
+        # check if username+passwords corresponds to an existing user
+        # load unique user salt (salt = filename)
+        existing_vaults = os.listdir(os.path.join(os.pardir, config.folder_vaults))
 
-        # generate unique user salt
-        user_salt_bytes = crng(32)
+        # if there are no users
+        if not existing_vaults:
 
-        # generate vault key
-        vault_key_bytes = generate_vault_key(username, password, user_salt_bytes, config.iterations, config.dklen)
+            # create user
+            clear()
+            print('\nYour user is being created. Please wait...')
 
-        # add headers to vault:
-        vault_headers = '\nwebsite name:url:username:password'
+            # generate unique user salt
+            user_salt_bytes = crng(32)
 
-        # encrypt string to add to vault
-        cipher_text_bytes, tag_bytes, nonce_bytes = encrypt_AES(vault_headers, vault_key_bytes)
+            # generate vault key
+            vault_key_bytes = generate_vault_key(username, password, user_salt_bytes, config.iterations, config.dklen)
 
-        # create vault with encryption
-        with open(os.path.join(os.pardir, config.folder_vaults, f'{user_salt_bytes.hex()}{config.ext}'), 'a') as envfile:
-            envfile.write(cipher_text_bytes.hex())
+            # add headers to vault:
+            vault_headers = '\nwebsite name:url:username:password'
 
-        # store unique salt, tag and nonce of user
-        with open(os.path.join(os.pardir, config.folder_tagNonce, f'{user_salt_bytes.hex()}{config.ext}'), 'a') as envfile:
-            envfile.write(f'{sha512_hash("tag_and_nonce")}={tag_bytes.hex()}:{nonce_bytes.hex()}')
+            # encrypt string to add to vault
+            cipher_text_bytes, tag_bytes, nonce_bytes = encrypt_AES(vault_headers, vault_key_bytes)
 
-        print(f'\nDone! You have {config.secs_until_redirect_creating_user} seconds to write down your login credentials:')
-        print(f'Username: {username}')
-        print(f'Password: {password}')
-        sleep(config.secs_until_redirect_creating_user)
-        clear()
-        choice = 'w'
-        continue
+            # create vault with encryption
+            with open(os.path.join(os.pardir, config.folder_vaults, f'{user_salt_bytes.hex()}{config.ext}'),
+                      'a') as envfile:
+                envfile.write(cipher_text_bytes.hex())
+
+            # store unique salt, tag and nonce of user
+            with open(os.path.join(os.pardir, config.folder_tagNonce, f'{user_salt_bytes.hex()}{config.ext}'),
+                      'a') as envfile:
+                envfile.write(f'{sha512_hash("tag_and_nonce")}={tag_bytes.hex()}:{nonce_bytes.hex()}')
+
+            print(
+                f'\nDone! You have {config.secs_until_redirect_creating_user} seconds to write down your login credentials:')
+            print(f'Username: {username}')
+            print(f'Password: {password}')
+            sleep(config.secs_until_redirect_creating_user)
+            clear()
+            choice = 'w'
+            continue
+
+        # if users exist
+        else:
+
+            # check cannot decrypt any existing vaults - meaning login credentials are taken
+            i = -1
+            is_not_existing_user = True
+            while is_not_existing_user:
+
+                i += 1
+                file = existing_vaults[i]
+
+                # load salt of user i
+                salt = bytes.fromhex(file[:-len(config.ext)])
+
+                # load tag and nonce of user i
+                env_encrypt = dotenv_values(os.path.join(os.pardir, config.folder_tagNonce, file))
+                tag_and_nonce = env_encrypt.get(sha512_hash('tag_and_nonce'), '')
+                tag, nonce = [bytes.fromhex(hex_str) for hex_str in tag_and_nonce.split(':')]
+
+                # load vault of user i
+                with open(os.path.join(os.pardir, config.folder_vaults, file), 'r') as envfile:
+                    vault_content_encrypted = bytes.fromhex(envfile.read())
+
+                # generate vault key
+                vault_key_bytes = generate_vault_key(username, password, salt, config.iterations, config.dklen)
+
+                # try to decrypt vault - if successful username and password corresponds to an existing user
+                try:
+                    vault_content_decrypted = decrypt_AES(vault_key_bytes, vault_content_encrypted, tag, nonce)
+                    is_not_existing_user = False
+
+                    print('\nLogin credentials are taken. Please try again.')
+                    choice = 'c'
+                    sleep(config.secs_until_redirect)
+                    clear()
+
+                # if decryption failed try next file/salt value
+                except ValueError:
+
+                    if file != existing_vaults[-1]:  # continue looping through filenames
+                        continue
+
+                    # if username+password does not match any existing users, the user can be created
+                    else:
+                        is_not_existing_user = False
+
+                        # create user
+                        clear()
+                        print('\nYour user is being created. Please wait...')
+
+                        # generate unique user salt
+                        user_salt_bytes = crng(32)
+
+                        # generate vault key
+                        vault_key_bytes = generate_vault_key(username, password, user_salt_bytes, config.iterations, config.dklen)
+
+                        # add headers to vault:
+                        vault_headers = '\nwebsite name:url:username:password'
+
+                        # encrypt string to add to vault
+                        cipher_text_bytes, tag_bytes, nonce_bytes = encrypt_AES(vault_headers, vault_key_bytes)
+
+                        # create vault with encryption
+                        with open(os.path.join(os.pardir, config.folder_vaults, f'{user_salt_bytes.hex()}{config.ext}'), 'a') as envfile:
+                            envfile.write(cipher_text_bytes.hex())
+
+                        # store unique salt, tag and nonce of user
+                        with open(os.path.join(os.pardir, config.folder_tagNonce, f'{user_salt_bytes.hex()}{config.ext}'), 'a') as envfile:
+                            envfile.write(f'{sha512_hash("tag_and_nonce")}={tag_bytes.hex()}:{nonce_bytes.hex()}')
+
+                        print(f'\nDone! You have {config.secs_until_redirect_creating_user} seconds to write down your login credentials:')
+                        print(f'Username: {username}')
+                        print(f'Password: {password}')
+                        sleep(config.secs_until_redirect_creating_user)
+                        clear()
+                        choice = 'w'
+                        continue
+
+            continue
 
     # login
     elif choice.lower() == 'l':
