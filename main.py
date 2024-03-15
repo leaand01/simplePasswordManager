@@ -125,7 +125,7 @@ while True:
                     vault_content_decrypted = decrypt_AES(vault_key_bytes, vault_content_encrypted, tag, nonce)
                     is_not_existing_user = False
 
-                    print('\nLogin credentials are taken. Please try again.')
+                    print('\nUsername is taken. Please try again.')
                     choice = 'c'
                     sleep(config.secs_until_redirect)
                     clear()
