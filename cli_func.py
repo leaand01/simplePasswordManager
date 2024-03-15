@@ -42,9 +42,9 @@ def is_inactive(start_time, secs_until_timeout):
 
 
 def inactivity_exit(secs_until_timeout):
+    clear()
     print('\nProgram is exited due to inactivity.')
     time.sleep(secs_until_timeout)
-    clear()
     sys.exit()
 
 
