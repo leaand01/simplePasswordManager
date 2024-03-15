@@ -68,6 +68,7 @@ The application has implemented several layers of protection to mitigate the ris
 -	Continuously clearing the terminal to not reveal any sensitive information in the terminal history
 -	Inactivity lockout set to 1minute. Increases confidentiality if you leave your pc unattended or forget to logout*
 -	User data is stored in hidden folders located in the parent directory, instead of the app root directory. It makes them slightly less obvious to detect, unless you read the code, and mitigates the risk of the user accidentally deleting them
+    - running the app from main.exe, the hidden folders are stored in this files parent directory
 -	Usernames and passwords are not stored, introducing two elements of unknown that needs to be guessed in order to gain access to the user account
 -	All text not sensitive to the user is saved in hashed format for obscured readability if the files are opened (e.g. column headers which are identical for all users)
 -	All text sensitive to the user, i.e. the inputted vault data, is stored encrypted. The decryption key is not stored but must be generated in order to decrypt the vault, making it harder for an attacker to gain access as he can only generate the key by guessing the users login credentials, which were not stored.
