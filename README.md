@@ -115,7 +115,7 @@ A weak point of the application is the fact that data is stored locally on the h
 
 Another weak point is that no backups of the data are made. Users can of course clone the code and save the stored data on e.g. GitHub. This would also make it more applicable for multiple users. In this case one should bear in mind not to commit any cached data which may reveal sensitive data. On the other hand, this could serve as a backup of data.
 
-Another weak point is that if you forget you login credentials you loose access to your account. Further, once created a user cannot delete his account unless he deletes the hidden folders. Thus, if more than one user was created this poses an issue and threat against availability for the remaining users.
+Another weak point is that if you forget your login credentials you loose access to your account. Further, once created a user cannot delete his account unless he deletes the hidden folders. Thus, if more than one user was created this poses an issue and threat against availability for the remaining users. An alternative to deleting your account would be to delete all data stored in the vault one line at a time using the 'delete row' command available when logged in.
 
 
 ## Application diagram
