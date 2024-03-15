@@ -62,6 +62,7 @@ The application has implemented several layers of protection to mitigate the ris
 - You can only create a user with a strong username and password since these are harder to crack. The applications definition of a strong username/password must fulfill the following:
   - Must minimum be of length 9 and contain at least one small and big letter, one digit and one punctuation
   - Username and password cannot be identical
+- Two users cannot have the same login credentials. Since login credentials are not stored a user can only be created if the inputted username and password cannot decrypt a vault of an existing user.
 -	User inputs are sanitized, not allowing certain punctuations, in order to mitigate the risk of XSS
     - Remark: this is redundant as it is an offline application. Thus, if you have access to the application, you have access to the hardware and source code. This feature would only be applicable if it were an online application. I realized this after having implemented the feature so I choose to keep it, should it ever be upgraded to an online version. However, it can easily be removed by editing the banned variable in the config file, setting it equal to banned = [‘:’].
 -	At login your entered password is not shown, mitigating the risk of anyone seeing your password by looking over your shoulder*
@@ -116,6 +117,8 @@ A weak point of the application is the fact that data is stored locally on the h
 Another weak point is that no backups of the data are made. Users can of course clone the code and save the stored data on e.g. GitHub. This would also make it more applicable for multiple users. In this case one should bear in mind not to commit any cached data which may reveal sensitive data. On the other hand, this could serve as a backup of data.
 
 Another weak point is that if you forget your login credentials you loose access to your account. Further, once created a user cannot delete his account unless he deletes the hidden folders. Thus, if more than one user was created this poses an issue and threat against availability for the remaining users. An alternative to deleting your account would be to delete all data stored in the vault one line at a time using the 'delete row' command available when logged in.
+
+When creating an user, if you receive the response 'Username is taken. Please try again.' this gives away information that another user has an account with your entered username. For an attacker this is useful information that can significantly speed up potential brute force attacks. However, we do not disclose the fact that the user/attacker has entered the exact same login credentials as an existing user, and thereby giving him access to another users account.
 
 
 ## Application diagram
