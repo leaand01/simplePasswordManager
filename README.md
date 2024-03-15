@@ -103,7 +103,7 @@ The encryption and password/login protection features of the application include
 -	If the hardware is stolen or breaks down your data is lost, and there is no backup (available issue)
 -	If you forget your username or password you cannot login to your account as it is not possible to reset either of them
 -	The password generator is rather simple and despite having introduced some randomness in the amount and placement of capital letters, digits and punctuations, the number of possible combinations could be brute forced with enough time and computing power.
-    - Remark: my intent was to use the word lists form the NLTK Python library and then select random words from this large collection. Due to implementation issues, I settled with this minimalistic version illustrating the same purpose, but with a much more limited collection of words (c.f. the config file).
+    - Remark: my intent was to use the word lists form the NLTK Python library and then select random words from this large collection. Due to implementation issues, I settled with this minimalistic version illustrating the same purpose, but with a much more limited collection of words, c.f. the config file.
 -	The applications definition of strength of a username and password is also rather simple, it could be improved such that e.g. substrings like ‘123’, ‘Password’, etc. would not be allowed. In other words, such that often uses phrases, numbers, sequences, etc. was not allowed.
 
 
