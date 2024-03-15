@@ -153,6 +153,18 @@ while True:
         clear()
         print(f'\nWelcome {username}. Here is you current password manager list (sorted by website name):')
 
+        # load vault
+        with open(os.path.join(os.pardir, config.folder_vaults, file), 'r') as envfile:
+            vault_content_encrypted = bytes.fromhex(envfile.read())
+
+        # load tag and nonce
+        env_encrypt = dotenv_values(os.path.join(os.pardir, config.folder_tagNonce, file))
+        tag_and_nonce = env_encrypt.get(sha512_hash('tag_and_nonce'), '')
+        tag, nonce = [bytes.fromhex(hex_str) for hex_str in tag_and_nonce.split(':')]
+
+        # decrypt vault
+        vault_content_decrypted = decrypt_AES(vault_key_bytes, vault_content_encrypted, tag, nonce)
+
         # print vault content
         lines_list = vault_content_decrypted.split('\n')[1:]
         for i, line in enumerate(lines_list):
@@ -168,11 +180,12 @@ while True:
         print(df_view)
 
         print('\na) add password to list')
+        print('d) delete row')
         print('e) exit')
 
         choice = timed_validated_sanitized_input(input_str='Enter your choice: ',
                                                  redirect_if_malicious='logged_in',
-                                                 valid_inputs=['a', 'e'],
+                                                 valid_inputs=['a', 'd', 'e'],
                                                  redirect_if_invalid='logged_in')
         clear()
         continue
@@ -183,10 +196,14 @@ while True:
         print('\nInput website name, url, username, password')
         input_website = timed_sanitized_input('\nEnter website name: ', 'a')
         if input_website == 'a':
+            print('Input must not equal a. Please try again.')
+            sleep(config.secs_until_redirect)
             continue
 
         input_url = timed_sanitized_input('\nEnter url: ', 'a')
         if input_url == 'a':
+            print('Input must not equal a. Please try again.')
+            sleep(config.secs_until_redirect)
             continue
 
         input_username = timed_validated_sanitized_input_generator('username', redirect_if_malicious='a')
@@ -207,7 +224,76 @@ while True:
         with open(os.path.join(os.pardir, config.folder_vaults, f'{salt.hex()}{config.ext}'), 'w') as envfile:
             envfile.write(cipher_text_bytes.hex())
 
-        # udpate tag and nonce (overwrite file)
+        # update tag and nonce (overwrite file)
+        with open(os.path.join(os.pardir, config.folder_tagNonce, f'{salt.hex()}{config.ext}'), 'w') as envfile:
+            envfile.write(f'{sha512_hash("tag_and_nonce")}={new_tag_bytes.hex()}:{new_nonce_bytes.hex()}')
+
+        choice = 'logged_in'
+        clear()
+        continue
+
+    # delete row of password manager list
+    elif choice.lower() == 'd':
+
+        if df_view.empty:
+            print('\nNo rows to delete.')
+            sleep(config.secs_until_redirect)
+            choice = 'logged_in'
+            continue
+
+        print(df_view)
+        row_str = timed_sanitized_input('\nEnter row number to delete (press r to return to password manager list): ',
+                                        'd')
+        if row_str.lower() == 'd':
+            clear()
+            continue
+
+        # return to password manager list (logged in menu)
+        if row_str.lower() == 'r':
+            choice = 'logged_in'
+            sleep(config.secs_until_redirect)
+            clear()
+            continue
+
+        # must not contain decimals
+        if '.' in row_str:
+            print('Invalid input. Please try again.')
+            sleep(config.secs_until_redirect)
+            clear()
+            continue
+
+        # convert to int
+        try:
+            row_int = int(row_str)
+        except ValueError:
+            print('Invalid input. Please try again.')
+            sleep(config.secs_until_redirect)
+            clear()
+            continue
+
+        # must equal a row index in the password manager list
+        if (row_int > len(df_view) - 1) or (row_int < 0):
+            print('Invalid input. Please try again.')
+            sleep(config.secs_until_redirect)
+            clear()
+            continue
+
+        # delete row
+        df_view = df_view.drop(row_int, axis=0)
+
+        # convert dataframe to stored string format
+        df_as_string = '\nwebsite name:url:username:password'  # vault column headers
+        for i in range(len(df_view)):
+            df_as_string += '\n' + ':'.join(df_view.iloc[i, :])
+
+        # encrypt updated vault
+        cipher_text_bytes, new_tag_bytes, new_nonce_bytes = encrypt_AES(df_as_string, vault_key_bytes)
+
+        # update vault (overwrite file)
+        with open(os.path.join(os.pardir, config.folder_vaults, f'{salt.hex()}{config.ext}'), 'w') as envfile:
+            envfile.write(cipher_text_bytes.hex())
+
+        # update tag and nonce (overwrite file)
         with open(os.path.join(os.pardir, config.folder_tagNonce, f'{salt.hex()}{config.ext}'), 'w') as envfile:
             envfile.write(f'{sha512_hash("tag_and_nonce")}={new_tag_bytes.hex()}:{new_nonce_bytes.hex()}')
 

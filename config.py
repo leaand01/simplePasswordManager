@@ -1,8 +1,8 @@
 from crypto_func import sha512_hash
 
 secs_until_timeout = 60
-secs_until_redirect = 1
-secs_until_redirect_creating_user = 8
+secs_until_redirect = 1.5
+secs_until_redirect_creating_user = 30
 
 folder_length = 50
 folder_vaults = sha512_hash('_vaults')[:folder_length]
