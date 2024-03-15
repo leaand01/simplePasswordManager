@@ -118,6 +118,8 @@ Another weak point is that no backups of the data are made. Users can of course 
 
 Another weak point is that if you forget your login credentials you loose access to your account. Further, once created a user cannot delete his account unless he deletes the hidden folders. Thus, if more than one user was created this poses an issue and threat against availability for the remaining users. An alternative to deleting your account would be to delete all data stored in the vault one line at a time using the 'delete row' command available when logged in.
 
+When creating an user, if you receive the response 'Username is taken. Please try again.' this gives away information that another user has an account with your entered username. For an attacker this is useful information that can significantly speed up potential brute force attacks. However, we do not disclose the fact that the user/attacker has entered the exact same login credentials as an existing user, and thereby giving him access to another users account.
+
 
 ## Application diagram
 ![ing5erdiagram](https://github.com/leaand01/simplePasswordManager/blob/master/new_appDiagram.drawio.png)
