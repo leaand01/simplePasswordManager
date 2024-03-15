@@ -39,7 +39,7 @@ I have embedded multiple lower and higher level security layers to ensure CIA.
 2.	Unzip the folder ‘main.py’
 3.	To start the SimplePasswordManager, open the unzipped folder ‘main’ and run the file main.exe 
 
-![ing5erdiagram](https://github.com/leaand01/simplePasswordManager/blob/master/app_screenshots.png])
+![ing5erdiagram](https://github.com/leaand01/simplePasswordManager/blob/master/app_screenshots.png)
 
 
 ## SimplePasswordManager – Security Discussion
@@ -118,4 +118,6 @@ Another weak point is that if you forget you login credentials you loose access 
 
 
 ## Application diagram
-![ing5erdiagram](https://github.com/leaand01/simplePasswordManager/blob/master/new_appDiagram.drawio.png])
+![ing5erdiagram](https://github.com/leaand01/simplePasswordManager/blob/master/new_appDiagram.drawio.png)
+
+
