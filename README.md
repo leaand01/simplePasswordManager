@@ -66,7 +66,7 @@ The application has implemented several layers of protection to mitigate the ris
     - Remark: this is redundant as it is an offline application. Thus, if you have access to the application, you have access to the hardware and source code. This feature would only be applicable if it were an online application. I realized this after having implemented the feature so I choose to keep it, should it ever be upgraded to an online version. However, it can easily be removed by editing the banned variable in the config file, setting it equal to banned = [‘:’].
 -	At login your entered password is not shown, mitigating the risk of anyone seeing your password by looking over your shoulder*
 -	Continuously clearing the terminal to not reveal any sensitive information in the terminal history
--	Inactivity lockout. Increases confidentiality if you leave your pc unattended or forget to logout*
+-	Inactivity lockout set to 1minute. Increases confidentiality if you leave your pc unattended or forget to logout*
 -	User data is stored in hidden folders located in the parent directory, instead of the app root directory. It makes them slightly less obvious to detect, unless you read the code, and mitigates the risk of the user accidentally deleting them
 -	Usernames and passwords are not stored, introducing two elements of unknown that needs to be guessed in order to gain access to the user account
 -	All text not sensitive to the user is saved in hashed format for obscured readability if the files are opened (e.g. column headers which are identical for all users)
