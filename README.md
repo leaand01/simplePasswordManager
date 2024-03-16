@@ -36,7 +36,7 @@ I have embedded multiple lower and higher level security layers to ensure CIA.
 
 ## Run application
 1.	Clone or fork the repository to your desired desktop location
-2.	Unzip the folder ‘main.py’
+2.	Unzip the folder ‘main.zip’
 3.	To start the SimplePasswordManager, open the unzipped folder ‘main’ and run the file main.exe 
 
 ![ing5erdiagram](https://github.com/leaand01/simplePasswordManager/blob/master/app_screenshots.png)
