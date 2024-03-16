@@ -112,13 +112,13 @@ The encryption and password/login protection features of the application include
 
 Encryption wise data is stored securely according to the ‘Protect data at rest’ principle, since it has a secure encryption using a strongly hashed key which is not stored. An attacker would have to guess the username and password and find the right corresponding stored salt value before he would be able to generate the vault key (a process which is slowed down due to the high number of iterations in PBKDF2) and then attempt to decrypt a vault. However, finding the salt value is not the problem as it is the filename of the users vault file and .env file, and most likely the app would have 1 or few users, i.e. salt values, since it is an offline app.  What makes the encryption secure is the fact that login credentials are not stored, introducing 2 elements of unknown that needs to be guessed. Note, if the login credentials, or decrypted vault content, could be saved in a cache of a session this would be a major security flaw.
 
+Further, if multiple users are created, the fact that two users cannot have identical login credendials, ensures that good intended users do not accidentically gain access to other accounts, mitigating the risk of a confidentiality breach. However, for an attacker this features as a stand alone does not mitigate or lower the risk of successfull brute force attack.
+
 A weak point of the application is the fact that data is stored locally on the hardware and can be deleted, the hardware can get stolen, or break down. To mitigate the risk of deleting the hidden folders, the user could actively secure them by removing all permissions for all other users.
 
 Another weak point is that no backups of the data are made. Users can of course clone the code and save the stored data on e.g. GitHub. This would also make it more applicable for multiple users. In this case one should bear in mind not to commit any cached data which may reveal sensitive data. On the other hand, this could serve as a backup of data.
 
 Another weak point is that if you forget your login credentials you loose access to your account. Further, once created a user cannot delete his account unless he deletes the hidden folders. Thus, if more than one user was created this poses an issue and threat against availability for the remaining users. An alternative to deleting your account would be to delete all data stored in the vault one line at a time using the 'delete row' command available when logged in.
-
-When creating an user, if you receive the response 'Username is taken. Please try again.' this gives away information that another user has an account with your entered username. For an attacker this is useful information that can significantly speed up potential brute force attacks. However, we do not disclose the fact that the user/attacker has entered the exact same login credentials as an existing user, and thereby giving him access to another users account.
 
 
 ## Application diagram
