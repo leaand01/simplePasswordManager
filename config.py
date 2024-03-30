@@ -4,9 +4,8 @@ secs_until_timeout = 60
 secs_until_redirect = 1.5
 secs_until_redirect_creating_user = 30
 
-folder_length = 50
-folder_vaults = sha512_hash('_vaults')[:folder_length]
-folder_tagNonce = sha512_hash('_tagNonce')[:folder_length]
+folder_vaults = '_vaults'
+folder_tagNonce = '_tagNonce'
 ext = '.env'
 
 # PBKDF2

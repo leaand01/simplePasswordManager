@@ -8,7 +8,7 @@ from dotenv import dotenv_values
 import config
 from cli_func import timed_validated_sanitized_input, timed_validated_sanitized_input_generator, timed_sanitized_input, \
     inactive_or_malicious
-from crypto_func import crng, generate_vault_key, encrypt_AES, decrypt_AES, sha512_hash
+from crypto_func import crng, generate_vault_key, encrypt_AES, decrypt_AES
 from general_func import *
 
 
@@ -83,7 +83,7 @@ while True:
             # store unique salt, tag and nonce of user
             with open(os.path.join(os.pardir, config.folder_tagNonce, f'{user_salt_bytes.hex()}{config.ext}'),
                       'a') as envfile:
-                envfile.write(f'{sha512_hash("tag_and_nonce")}={tag_bytes.hex()}:{nonce_bytes.hex()}')
+                envfile.write(f'"tag_and_nonce"={tag_bytes.hex()}:{nonce_bytes.hex()}')
 
             print(
                 f'\nDone! You have {config.secs_until_redirect_creating_user} seconds to write down your login credentials:')
@@ -110,7 +110,7 @@ while True:
 
                 # load tag and nonce of user i
                 env_encrypt = dotenv_values(os.path.join(os.pardir, config.folder_tagNonce, file))
-                tag_and_nonce = env_encrypt.get(sha512_hash('tag_and_nonce'), '')
+                tag_and_nonce = env_encrypt.get('tag_and_nonce', '')
                 tag, nonce = [bytes.fromhex(hex_str) for hex_str in tag_and_nonce.split(':')]
 
                 # load vault of user i
@@ -162,7 +162,7 @@ while True:
 
                         # store unique salt, tag and nonce of user
                         with open(os.path.join(os.pardir, config.folder_tagNonce, f'{user_salt_bytes.hex()}{config.ext}'), 'a') as envfile:
-                            envfile.write(f'{sha512_hash("tag_and_nonce")}={tag_bytes.hex()}:{nonce_bytes.hex()}')
+                            envfile.write(f'"tag_and_nonce"={tag_bytes.hex()}:{nonce_bytes.hex()}')
 
                         print(f'\nDone! You have {config.secs_until_redirect_creating_user} seconds to write down your login credentials:')
                         print(f'Username: {username}')
@@ -204,7 +204,7 @@ while True:
 
             # load tag and nonce of user i
             env_encrypt = dotenv_values(os.path.join(os.pardir, config.folder_tagNonce, file))
-            tag_and_nonce = env_encrypt.get(sha512_hash('tag_and_nonce'), '')
+            tag_and_nonce = env_encrypt.get('tag_and_nonce', '')
             tag, nonce = [bytes.fromhex(hex_str) for hex_str in tag_and_nonce.split(':')]
 
             # load vault of user i
@@ -249,7 +249,7 @@ while True:
 
         # load tag and nonce
         env_encrypt = dotenv_values(os.path.join(os.pardir, config.folder_tagNonce, file))
-        tag_and_nonce = env_encrypt.get(sha512_hash('tag_and_nonce'), '')
+        tag_and_nonce = env_encrypt.get('tag_and_nonce', '')
         tag, nonce = [bytes.fromhex(hex_str) for hex_str in tag_and_nonce.split(':')]
 
         # decrypt vault
@@ -316,7 +316,7 @@ while True:
 
         # update tag and nonce (overwrite file)
         with open(os.path.join(os.pardir, config.folder_tagNonce, f'{salt.hex()}{config.ext}'), 'w') as envfile:
-            envfile.write(f'{sha512_hash("tag_and_nonce")}={new_tag_bytes.hex()}:{new_nonce_bytes.hex()}')
+            envfile.write(f'"tag_and_nonce"={new_tag_bytes.hex()}:{new_nonce_bytes.hex()}')
 
         choice = 'logged_in'
         clear()
@@ -385,7 +385,7 @@ while True:
 
         # update tag and nonce (overwrite file)
         with open(os.path.join(os.pardir, config.folder_tagNonce, f'{salt.hex()}{config.ext}'), 'w') as envfile:
-            envfile.write(f'{sha512_hash("tag_and_nonce")}={new_tag_bytes.hex()}:{new_nonce_bytes.hex()}')
+            envfile.write(f'"tag_and_nonce"={new_tag_bytes.hex()}:{new_nonce_bytes.hex()}')
 
         choice = 'logged_in'
         clear()
