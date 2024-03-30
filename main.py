@@ -2,13 +2,12 @@ import getpass
 import sys
 from time import sleep, time
 
-import pandas as pd
-from dotenv import dotenv_values
 
 import config
-from cli_func import timed_validated_sanitized_input, timed_validated_sanitized_input_generator, timed_sanitized_input, \
-    inactive_or_malicious
-from crypto_func import crng, generate_vault_key, encrypt_AES, decrypt_AES
+from cli_func import timed_validated_sanitized_input, timed_validated_sanitized_input_generator, \
+    timed_sanitized_input, inactive_or_malicious, create_user, decrypt_vault, print_decrypted_content_as_dataframe, \
+    update_vault, update_tag_none, valid_row_input, update_dataframe, create_first_user
+from crypto_func import encrypt_AES
 from general_func import *
 
 
@@ -53,126 +52,22 @@ while True:
             continue
 
         # check if username+passwords corresponds to an existing user
-        # load unique user salt (salt = filename)
-        existing_vaults = os.listdir(os.path.join(os.pardir, config.folder_vaults))
-
-        # if there are no users
-        if not existing_vaults:
-
-            # create user
-            clear()
-            print('\nYour user is being created. Please wait...')
-
-            # generate unique user salt
-            user_salt_bytes = crng(32)
-
-            # generate vault key
-            vault_key_bytes = generate_vault_key(username, password, user_salt_bytes, config.iterations, config.dklen)
-
-            # add headers to vault:
-            vault_headers = '\nwebsite name:url:username:password'
-
-            # encrypt string to add to vault
-            cipher_text_bytes, tag_bytes, nonce_bytes = encrypt_AES(vault_headers, vault_key_bytes)
-
-            # create vault with encryption
-            with open(os.path.join(os.pardir, config.folder_vaults, f'{user_salt_bytes.hex()}{config.ext}'),
-                      'a') as envfile:
-                envfile.write(cipher_text_bytes.hex())
-
-            # store unique salt, tag and nonce of user
-            with open(os.path.join(os.pardir, config.folder_tagNonce, f'{user_salt_bytes.hex()}{config.ext}'),
-                      'a') as envfile:
-                envfile.write(f'"tag_and_nonce"={tag_bytes.hex()}:{nonce_bytes.hex()}')
-
-            print(
-                f'\nDone! You have {config.secs_until_redirect_creating_user} seconds to write down your login credentials:')
-            print(f'Username: {username}')
-            print(f'Password: {password}')
-            sleep(config.secs_until_redirect_creating_user)
-            clear()
+        created = create_first_user(username, password)
+        if created:
             choice = 'w'
             continue
 
         # if users exist
-        else:
-
-            # check cannot decrypt any existing vaults - meaning login credentials are taken
-            i = -1
-            is_not_existing_user = True
-            while is_not_existing_user:
-
-                i += 1
-                file = existing_vaults[i]
-
-                # load salt of user i
-                salt = bytes.fromhex(file[:-len(config.ext)])
-
-                # load tag and nonce of user i
-                env_encrypt = dotenv_values(os.path.join(os.pardir, config.folder_tagNonce, file))
-                tag_and_nonce = env_encrypt.get('tag_and_nonce', '')
-                tag, nonce = [bytes.fromhex(hex_str) for hex_str in tag_and_nonce.split(':')]
-
-                # load vault of user i
-                with open(os.path.join(os.pardir, config.folder_vaults, file), 'r') as envfile:
-                    vault_content_encrypted = bytes.fromhex(envfile.read())
-
-                # generate vault key
-                vault_key_bytes = generate_vault_key(username, password, salt, config.iterations, config.dklen)
-
-                # try to decrypt vault - if successful username and password corresponds to an existing user
-                try:
-                    vault_content_decrypted = decrypt_AES(vault_key_bytes, vault_content_encrypted, tag, nonce)
-                    is_not_existing_user = False
-
-                    print('\nUsername is taken. Please try again.')
-                    choice = 'c'
-                    sleep(config.secs_until_redirect)
-                    clear()
-
-                # if decryption failed try next file/salt value
-                except ValueError:
-
-                    if file != existing_vaults[-1]:  # continue looping through filenames
-                        continue
-
-                    # if username+password does not match any existing users, the user can be created
-                    else:
-                        is_not_existing_user = False
-
-                        # create user
-                        clear()
-                        print('\nYour user is being created. Please wait...')
-
-                        # generate unique user salt
-                        user_salt_bytes = crng(32)
-
-                        # generate vault key
-                        vault_key_bytes = generate_vault_key(username, password, user_salt_bytes, config.iterations, config.dklen)
-
-                        # add headers to vault:
-                        vault_headers = '\nwebsite name:url:username:password'
-
-                        # encrypt string to add to vault
-                        cipher_text_bytes, tag_bytes, nonce_bytes = encrypt_AES(vault_headers, vault_key_bytes)
-
-                        # create vault with encryption
-                        with open(os.path.join(os.pardir, config.folder_vaults, f'{user_salt_bytes.hex()}{config.ext}'), 'a') as envfile:
-                            envfile.write(cipher_text_bytes.hex())
-
-                        # store unique salt, tag and nonce of user
-                        with open(os.path.join(os.pardir, config.folder_tagNonce, f'{user_salt_bytes.hex()}{config.ext}'), 'a') as envfile:
-                            envfile.write(f'"tag_and_nonce"={tag_bytes.hex()}:{nonce_bytes.hex()}')
-
-                        print(f'\nDone! You have {config.secs_until_redirect_creating_user} seconds to write down your login credentials:')
-                        print(f'Username: {username}')
-                        print(f'Password: {password}')
-                        sleep(config.secs_until_redirect_creating_user)
-                        clear()
-                        choice = 'w'
-                        continue
-
+        res = decrypt_vault(username, password)
+        if res is None:
+            create_user(username, password)
+            choice = 'w'
             continue
+
+        print('\nUsername is taken. Please try again.')
+        choice = 'c'
+        sleep(config.secs_until_redirect)
+        clear()
 
     # login
     elif choice.lower() == 'l':
@@ -188,54 +83,18 @@ while True:
         if password == 'l':
             continue
 
-        # check if username+passwords corresponds to an existing user
-        # load unique user salt (salt = filename)
-        existing_vaults = os.listdir(os.path.join(os.pardir, config.folder_vaults))
+        res = decrypt_vault(username, password)
+        if res is None:
+            print('\nInvalid username/password. Please try again.')
+            choice = 'l'
+            sleep(config.secs_until_redirect)
+            clear()
+            continue
 
-        i = -1
-        is_not_existing_user = True
-        while is_not_existing_user:
-
-            i += 1
-            file = existing_vaults[i]
-
-            # load salt of user i
-            salt = bytes.fromhex(file[:-len(config.ext)])
-
-            # load tag and nonce of user i
-            env_encrypt = dotenv_values(os.path.join(os.pardir, config.folder_tagNonce, file))
-            tag_and_nonce = env_encrypt.get('tag_and_nonce', '')
-            tag, nonce = [bytes.fromhex(hex_str) for hex_str in tag_and_nonce.split(':')]
-
-            # load vault of user i
-            with open(os.path.join(os.pardir, config.folder_vaults, file), 'r') as envfile:
-                vault_content_encrypted = bytes.fromhex(envfile.read())
-
-            # generate vault key
-            vault_key_bytes = generate_vault_key(username, password, salt, config.iterations, config.dklen)
-
-            # try to decrypt vault - if successful username and password corresponds to an existing user
-            try:
-                vault_content_decrypted = decrypt_AES(vault_key_bytes, vault_content_encrypted, tag, nonce)
-                is_not_existing_user = False
-
-                print('\nSuccessful login. You are being redirected.')
-                choice = 'logged_in'
-                sleep(config.secs_until_redirect)
-                clear()
-
-            # if decryption failed try next file/salt value
-            except ValueError:
-
-                # if username+password does not match any existing users
-                if file == existing_vaults[-1]:
-                    print('\nInvalid username/password. Please try again.')
-                    is_not_existing_user = False  # exit while loop and repeat login
-                    choice = 'l'
-                    sleep(config.secs_until_redirect)
-                    clear()
-
-                continue
+        print('\nSuccessful login. You are being redirected.')
+        choice = 'logged_in'
+        sleep(config.secs_until_redirect)
+        clear()
         continue
 
     # logged in menu
@@ -243,32 +102,10 @@ while True:
         clear()
         print(f'\nWelcome {username}. Here is you current password manager list (sorted by website name):')
 
-        # load vault
-        with open(os.path.join(os.pardir, config.folder_vaults, file), 'r') as envfile:
-            vault_content_encrypted = bytes.fromhex(envfile.read())
+        res = decrypt_vault(username, password)
+        file, salt, tag, nonce, vault_key_bytes, vault_content_decrypted = res
 
-        # load tag and nonce
-        env_encrypt = dotenv_values(os.path.join(os.pardir, config.folder_tagNonce, file))
-        tag_and_nonce = env_encrypt.get('tag_and_nonce', '')
-        tag, nonce = [bytes.fromhex(hex_str) for hex_str in tag_and_nonce.split(':')]
-
-        # decrypt vault
-        vault_content_decrypted = decrypt_AES(vault_key_bytes, vault_content_encrypted, tag, nonce)
-
-        # print vault content
-        lines_list = vault_content_decrypted.split('\n')[1:]
-        for i, line in enumerate(lines_list):
-
-            # first line of password manager list is column headers
-            if i == 0:
-                df_view = pd.DataFrame(columns=line.split(':'))
-            else:
-                df_view.loc[len(df_view)] = line.split(':')
-
-        df_view.sort_values(['website name'], ignore_index=True, inplace=True)
-        print('\n')
-        print(df_view)
-
+        df_view = print_decrypted_content_as_dataframe(vault_content_decrypted)
         print('\na) add password to list')
         print('d) delete row')
         print('e) exit')
@@ -310,13 +147,8 @@ while True:
         # encrypt vault
         cipher_text_bytes, new_tag_bytes, new_nonce_bytes = encrypt_AES(vault_content_decrypted, vault_key_bytes)
 
-        # update vault (overwrite file)
-        with open(os.path.join(os.pardir, config.folder_vaults, f'{salt.hex()}{config.ext}'), 'w') as envfile:
-            envfile.write(cipher_text_bytes.hex())
-
-        # update tag and nonce (overwrite file)
-        with open(os.path.join(os.pardir, config.folder_tagNonce, f'{salt.hex()}{config.ext}'), 'w') as envfile:
-            envfile.write(f'"tag_and_nonce"={new_tag_bytes.hex()}:{new_nonce_bytes.hex()}')
+        update_vault(cipher_text_bytes, salt)
+        update_tag_none(salt, new_tag_bytes, new_nonce_bytes)
 
         choice = 'logged_in'
         clear()
@@ -345,47 +177,10 @@ while True:
             clear()
             continue
 
-        # must not contain decimals
-        if '.' in row_str:
-            print('Invalid input. Please try again.')
-            sleep(config.secs_until_redirect)
-            clear()
+        if not valid_row_input(row_str, df_view):
             continue
 
-        # convert to int
-        try:
-            row_int = int(row_str)
-        except ValueError:
-            print('Invalid input. Please try again.')
-            sleep(config.secs_until_redirect)
-            clear()
-            continue
-
-        # must equal a row index in the password manager list
-        if (row_int > len(df_view) - 1) or (row_int < 0):
-            print('Invalid input. Please try again.')
-            sleep(config.secs_until_redirect)
-            clear()
-            continue
-
-        # delete row
-        df_view = df_view.drop(row_int, axis=0)
-
-        # convert dataframe to stored string format
-        df_as_string = '\nwebsite name:url:username:password'  # vault column headers
-        for i in range(len(df_view)):
-            df_as_string += '\n' + ':'.join(df_view.iloc[i, :])
-
-        # encrypt updated vault
-        cipher_text_bytes, new_tag_bytes, new_nonce_bytes = encrypt_AES(df_as_string, vault_key_bytes)
-
-        # update vault (overwrite file)
-        with open(os.path.join(os.pardir, config.folder_vaults, f'{salt.hex()}{config.ext}'), 'w') as envfile:
-            envfile.write(cipher_text_bytes.hex())
-
-        # update tag and nonce (overwrite file)
-        with open(os.path.join(os.pardir, config.folder_tagNonce, f'{salt.hex()}{config.ext}'), 'w') as envfile:
-            envfile.write(f'"tag_and_nonce"={new_tag_bytes.hex()}:{new_nonce_bytes.hex()}')
+        update_dataframe(df_view, row_str, vault_key_bytes, salt)
 
         choice = 'logged_in'
         clear()

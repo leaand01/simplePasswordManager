@@ -1,8 +1,8 @@
 from crypto_func import sha512_hash
 
-secs_until_timeout = 60
+secs_until_timeout = 300
 secs_until_redirect = 1.5
-secs_until_redirect_creating_user = 30
+secs_until_redirect_creating_user = 60
 
 folder_vaults = '_vaults'
 folder_tagNonce = '_tagNonce'
